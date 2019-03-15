@@ -25,7 +25,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#define NAV_C // needed to get the nav funcitons like Inside...
+#define NAV_C // needed to get the nav functions like Inside...
 #include "generated/flight_plan.h"
 
 #define ORANGE_AVOIDER_VERBOSE TRUE
@@ -37,10 +37,25 @@
 #define VERBOSE_PRINT(...)
 #endif
 
+/*
+uint8_t is the same as a byte.
+uint8_t,uint16_t,uint32_t & uint64_t exist and are equal respectively to: 
+unsigned char, unsigned short, unsigned int and unsigned long long.
+uint8_t correspond to a maximum number of (2^8)-1=255; 0 is considered as a count and the last count is 255
+For more information, visit https://www.badprog.com/c-type-what-are-uint8-t-uint16-t-uint32-t-and-uint64-t
+*/
+
 uint8_t moveWaypointForward(uint8_t waypoint, float distanceMeters);
 uint8_t moveWaypoint(uint8_t waypoint, struct EnuCoor_i *new_coor);
 uint8_t increase_nav_heading(float incrementDegrees);
 uint8_t chooseRandomIncrementAvoidance(void);
+
+/*
+Used to declare an enumeration, a distinct type that consists of a set of named constants called the enumerator list.
+By default, the first enumerator has the value 0, and the value of each successive enumerator is increased by 1. 
+For example, [SAFE] is 1, [OBSTACLE_FOUND] is 2 and so forth.
+For more information, visit https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
+*/
 
 enum navigation_state_t {
   SAFE,
@@ -49,17 +64,30 @@ enum navigation_state_t {
   OUT_OF_BOUNDS
 };
 
+/*
+float is defined to hold real numbers
+According to the C# specification, a number containing a decimal point that doesn't have a suffix is interpreted as a double
+float is a single precision (32 bit) floating point data type, double is a double precision (64 bit) floating point data type and decimal is a 128-bit floating point data type
+*/
+
 // define settings
-float oa_color_count_frac = 0.18f;
+float oa_color_count_frac = 0.15f;	//oa_colour_count_frac is defined as a float 18%(initially)
 
 // define and initialise global variables
 enum navigation_state_t navigation_state = SEARCH_FOR_SAFE_HEADING;
 int32_t color_count = 0;               // orange color count from color filter for obstacle detection
 int16_t obstacle_free_confidence = 0;   // a measure of how certain we are that the way ahead is safe.
-float heading_increment = 5.f;          // heading angle increment [deg]
-float maxDistance = 2.25;               // max waypoint displacement [m]
+float heading_increment = 6.5f;          // heading angle increment [deg]
+float heading_increment_home = 180.0f;	 // Execute 180 [deg] upon encountering boundary
+float maxDistance = 2.25;               // max waypoint displacement [m] 2.25 initially
 
-const int16_t max_trajectory_confidence = 5; // number of consecutive negative object detections to be sure we are obstacle free
+/*
+const declare a constant field or a constant local. 
+Constant fields and locals aren't variables and may not be modified. 
+Constants can be numbers, Boolean values, strings, or a null reference.
+*/
+
+const int16_t max_trajectory_confidence = 5; // constant number of consecutive negative object detections to be sure we are obstacle free
 
 #ifndef ORANGE_AVOIDER_VISUAL_DETECTION_ID
 #define ORANGE_AVOIDER_VISUAL_DETECTION_ID ABI_BROADCAST
@@ -96,7 +124,7 @@ void orange_avoider_periodic(void)
     return;
   }
 
-  // compute current color thresholds
+  // compute current color thresholds (colour count fraction*camera output width*camera height = fraction*area)
   int32_t color_count_threshold = oa_color_count_frac * front_camera.output_size.w * front_camera.output_size.h;
 
   VERBOSE_PRINT("Color_count: %d  threshold: %d state: %d \n", color_count, color_count, navigation_state);
@@ -111,7 +139,7 @@ void orange_avoider_periodic(void)
   // bound obstacle_free_confidence
   Bound(obstacle_free_confidence, 0, max_trajectory_confidence);
 
-  float moveDistance = fminf(maxDistance, 0.2f * obstacle_free_confidence);
+  float moveDistance = fminf(maxDistance, 0.2f * obstacle_free_confidence);//0.2f initially
 
   switch (navigation_state){
     case SAFE:
@@ -128,8 +156,9 @@ void orange_avoider_periodic(void)
       break;
     case OBSTACLE_FOUND:
       // stop
-      waypoint_set_here_2d(WP_GOAL);
-      waypoint_set_here_2d(WP_TRAJECTORY);
+      //waypoint_set_here_2d(WP_GOAL);
+      //waypoint_set_here_2d(WP_TRAJECTORY);
+      moveWaypointForward(WP_TRAJECTORY,2.0f * moveDistance); //additional line added
 
       // randomly select new search direction
       chooseRandomIncrementAvoidance();
@@ -147,7 +176,7 @@ void orange_avoider_periodic(void)
       break;
     case OUT_OF_BOUNDS:
       increase_nav_heading(heading_increment);
-      moveWaypointForward(WP_TRAJECTORY, 1.5f);
+      moveWaypointForward(WP_TRAJECTORY, 1.5f);//only 1.5f initially
 
       if (InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))){
         // add offset to head back into arena
@@ -228,10 +257,10 @@ uint8_t chooseRandomIncrementAvoidance(void)
 {
   // Randomly choose CW or CCW avoiding direction
   if (rand() % 2 == 0) {
-    heading_increment = 5.f;
+    heading_increment = 6.5f;//5.f initially
     VERBOSE_PRINT("Set avoidance increment to: %f\n", heading_increment);
   } else {
-    heading_increment = -5.f;
+    heading_increment = -6.5f;//5.f initially
     VERBOSE_PRINT("Set avoidance increment to: %f\n", heading_increment);
   }
   return false;
