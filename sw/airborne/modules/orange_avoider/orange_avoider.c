@@ -71,7 +71,7 @@ float is a single precision (32 bit) floating point data type, double is a doubl
 */
 
 // define settings
-float oa_color_count_frac = 0.15f;	//oa_colour_count_frac is defined as a float 18%(initially)
+float oa_color_count_frac = 0.2f;	//oa_colour_count_frac is defined as a float 18%(initially)
 
 // define and initialise global variables
 enum navigation_state_t navigation_state = SEARCH_FOR_SAFE_HEADING;
