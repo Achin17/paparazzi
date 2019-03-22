@@ -77,7 +77,7 @@ float oa_color_count_frac = 0.2f;	//oa_colour_count_frac is defined as a float 1
 enum navigation_state_t navigation_state = SEARCH_FOR_SAFE_HEADING;
 int32_t color_count = 0;               // orange color count from color filter for obstacle detection
 int16_t obstacle_free_confidence = 0;   // a measure of how certain we are that the way ahead is safe.
-float heading_increment = 6.5f;          // heading angle increment [deg]
+float heading_increment = 5.0f;          // heading angle increment [deg]
 float heading_increment_home = 180.0f;	 // Execute 180 [deg] upon encountering boundary
 float maxDistance = 2.25;               // max waypoint displacement [m] 2.25 initially
 
@@ -130,7 +130,7 @@ void orange_avoider_periodic(void)
   VERBOSE_PRINT("Color_count: %d  threshold: %d state: %d \n", color_count, color_count, navigation_state);
 
   // update our safe confidence using color threshold
-  if(color_count <= 2500 && color_count >=2100){
+  if(color_count <= 2500 && color_count >= 2100){
     obstacle_free_confidence++;
   } else {
     obstacle_free_confidence -= 2;  // be more cautious with positive obstacle detections
@@ -257,10 +257,10 @@ uint8_t chooseRandomIncrementAvoidance(void)
 {
   // Randomly choose CW or CCW avoiding direction
   if (rand() % 2 == 0) {
-    heading_increment = 6.5f;//5.f initially
+    heading_increment = 5.0f;//5.f initially
     VERBOSE_PRINT("Set avoidance increment to: %f\n", heading_increment);
   } else {
-    heading_increment = -6.5f;//5.f initially
+    heading_increment = -5.0f;//5.f initially
     VERBOSE_PRINT("Set avoidance increment to: %f\n", heading_increment);
   }
   return false;
