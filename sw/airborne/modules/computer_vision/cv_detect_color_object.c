@@ -208,7 +208,7 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
 
   // Go through all the pixels
   for (uint16_t y = img->h/2 - 50 ; y < img->h/2 + 50 ; y++) {
-    for (uint16_t x = 0; x < 25; x++) {
+    for (uint16_t x = 0+35; x < 50+35; x++) {
       // Check if the color is inside the specified values
       uint8_t *yp, *up, *vp;
       if (x % 2 == 0) {
@@ -234,6 +234,18 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
           *yp = 255;  // make pixel brighter in image
         }
       }
+// group 1 pink filter
+      if ( (*yp >= 99) && (*yp <= 130) &&
+           (*up >= 108 ) && (*up <= 148 ) &&
+           (*vp >= 120 ) && (*vp <= 170 )) {
+        cnt ++;
+        tot_x += x;
+        tot_y += y;
+        if (draw){
+          *yp = 255;  // make pixel brighter in image
+        }
+      }
+
     }
   }
   if (cnt > 0) {

@@ -129,8 +129,10 @@ void orange_avoider_periodic(void)
 
   VERBOSE_PRINT("Color_count: %d  threshold: %d state: %d \n", color_count, color_count, navigation_state);
 
+  printf("Integer color_count: %d\n",color_count);
+
   // update our safe confidence using color threshold
-  if(color_count <= 2500 && color_count >= 2100){
+  if(color_count <= 2500*2 && color_count >= 1800*2){
     obstacle_free_confidence++;
   } else {
     obstacle_free_confidence -= 2;  // be more cautious with positive obstacle detections
