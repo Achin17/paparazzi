@@ -204,10 +204,12 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
   uint32_t cnt = 0;
   uint32_t tot_x = 0;
   uint32_t tot_y = 0;
+  uint32_t flag = 1;
   uint8_t *buffer = img->buf;
 
   // Go through all the pixels
   for (uint16_t y = img->h/2 - 70 ; y < img->h/2 + 70 ; y++) {
+    uint32_t cnt_column = 0;
     for (uint16_t x = 0+35; x < 50+35; x++) {
       // Check if the color is inside the specified values
       uint8_t *yp, *up, *vp;
@@ -228,6 +230,7 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
            (*up >= cb_min ) && (*up <= cb_max ) &&
            (*vp >= cr_min ) && (*vp <= cr_max )) {
         cnt ++;
+        cnt_column ++;
         tot_x += x;
         tot_y += y;
         if (draw){
@@ -251,6 +254,7 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
            (*up >= 105 ) && (*up <= 140 ) &&
            (*vp >= 135 ) && (*vp <= 180 )) {
         cnt ++;
+        cnt_column ++;
         tot_x += x;
         tot_y += y;
         if (draw){
@@ -259,6 +263,9 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
       }
 
     }
+
+    if (cnt_column == 0){flag = 0;}
+
   }
   if (cnt > 0) {
     *p_xc = (int32_t)roundf(tot_x / ((float) cnt) - img->w * 0.5f);
@@ -267,6 +274,8 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
     *p_xc = 0;
     *p_yc = 0;
   }
+
+  if (flag == 0) {cnt = 0;}
   return cnt;
 }
 
