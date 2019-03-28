@@ -206,6 +206,34 @@ uint32_t find_object_centroid(struct image_t *img, int32_t* p_xc, int32_t* p_yc,
   uint32_t tot_y = 0;
   uint8_t *buffer = img->buf;
 
+  // draw the optical flow detection area
+  for (uint16_t y = 0 ; y < img->h; y++) {
+    for (uint16_t x = 0; x < img->w; x++) {
+      uint8_t *yp0, *up0, *vp0;
+      if (x % 2 == 0) {
+        // Even x
+        up0 = &buffer[y * 2 * img->w + 2 * x];      // U
+        yp0 = &buffer[y * 2 * img->w + 2 * x + 1];  // Y1
+        vp0 = &buffer[y * 2 * img->w + 2 * x + 2];  // V
+        //yp = &buffer[y * 2 * img->w + 2 * x + 3]; // Y2
+      } else {
+        // Uneven x
+        up0 = &buffer[y * 2 * img->w + 2 * x - 2];  // U
+        //yp = &buffer[y * 2 * img->w + 2 * x - 1]; // Y1
+        vp0 = &buffer[y * 2 * img->w + 2 * x];      // V
+        yp0 = &buffer[y * 2 * img->w + 2 * x + 1];  // Y2
+      }
+      if (x == img->w - 0.3*100 && y < img->h - 1.5*100 && y > 1.5*100)
+      {*yp0 = 255;}
+      if (x == 0.3*100 && y < img->h - 1.5*100 && y > 1.5*100)
+      {*yp0 = 255;}
+      if (y == 1.5*100 && x < img->w - 0.3*100 && x > 0.3*100)
+      {*yp0 = 255;}
+      if (y == img->h - 1.5*100 && x < img->w - 0.3*100 && x > 0.3*100)
+      {*yp0 = 255;}
+    }
+  }
+
   // Go through all the pixels
   for (uint16_t y = img->h/2 - 70 ; y < img->h/2 + 70 ; y++) {
     for (uint16_t x = 0+35; x < 50+35; x++) {

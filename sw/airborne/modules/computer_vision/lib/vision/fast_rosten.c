@@ -89,6 +89,7 @@ void fast9_detect(struct image_t *img, uint8_t threshold, uint16_t min_dist, uin
 
     for (x = x_start; x < x_end; x++) {
       // First check if we aren't in range vertical (TODO: fix less intensive way)
+
       if (min_dist > 0) {
 
         need_skip = 0;

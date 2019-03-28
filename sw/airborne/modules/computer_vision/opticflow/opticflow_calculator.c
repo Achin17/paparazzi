@@ -50,7 +50,7 @@
 #include BOARD_CONFIG
 
 // whether to show the flow and corners:
-#define OPTICFLOW_SHOW_CORNERS 0
+#define OPTICFLOW_SHOW_CORNERS 1
 
 #define EXHAUSTIVE_FAST 0
 #define ACT_FAST 1
@@ -220,7 +220,7 @@ PRINT_CONFIG_VAR(OPTICFLOW_TRACK_BACK)
 // Whether to draw the flow on the image:
 // False by default, since it changes the image and costs time.
 #ifndef OPTICFLOW_SHOW_FLOW
-#define OPTICFLOW_SHOW_FLOW FALSE
+#define OPTICFLOW_SHOW_FLOW TRUE  // Yingfu Debuging
 #endif
 PRINT_CONFIG_VAR(OPTICFLOW_SHOW_FLOW)
 
@@ -388,6 +388,7 @@ bool calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct image_t *img,
 
 #if OPTICFLOW_SHOW_CORNERS
   image_show_points(img, opticflow->fast9_ret_corners, result->corner_cnt);
+  // printf("image_show_points?\n");
 #endif
 
   // Check if we found some corners to track
@@ -461,6 +462,7 @@ bool calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct image_t *img,
     uint8_t color[4] = {0, 0, 0, 0};
     uint8_t bad_color[4] = {0, 0, 0, 0};
     image_show_flow_color(img, vectors, result->tracked_cnt, opticflow->subpixel_factor, color, bad_color);
+    // printf("image_show_flow_color?\n");
   }
 
   static int n_samples = 100;
@@ -555,6 +557,7 @@ bool calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct image_t *img,
           uint8_t color[4] = {255, 255, 255, 255};
           uint8_t bad_color[4] = {255, 255, 255, 255};
           image_show_flow_color(img, predicted_flow_vectors, result->tracked_cnt, opticflow->subpixel_factor, color, bad_color);
+          // printf("image_show_flow_color derotation?\n");
         }
 
         for (int i = 0; i < result->tracked_cnt; i++) {

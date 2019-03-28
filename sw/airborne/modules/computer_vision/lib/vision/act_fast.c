@@ -58,7 +58,7 @@ void act_fast(struct image_t *img, uint8_t fast_threshold, uint16_t *num_corners
   // ensure that n_agents is never bigger than MAX_AGENTS
   n_agents = (n_agents < MAX_AGENTS) ? n_agents : MAX_AGENTS;
 
-  int border = 4;
+  int border = 100; //4;
 
   // ***********************************
   // 1) initialize the agents' positions
@@ -106,7 +106,7 @@ void act_fast(struct image_t *img, uint8_t fast_threshold, uint16_t *num_corners
         // check if this position is a corner:
         uint16_t x = (uint16_t) agents[a].x;
         uint16_t y = (uint16_t) agents[a].y;
-        if (fast9_detect_pixel(img, fast_threshold, x, y)) {
+        if (fast9_detect_pixel(img, fast_threshold, x, y) && (x < img->w - 0.3*border && x > 0.3*border && y < img->h - 1.5*border && y > 1.5*border)) {
           // we arrived at a corner, yeah!!!
           agents[a].active = 0;
           break;
@@ -128,15 +128,15 @@ void act_fast(struct image_t *img, uint8_t fast_threshold, uint16_t *num_corners
         }
 
         // let the agent move over the image in a toroid world:
-        if (agents[a].x > img->w - border) {
-          agents[a].x = border;
-        } else if (agents[a].x < border) {
-          agents[a].x = img->w - border;
+        if (agents[a].x > img->w - 0.3*border) {
+          agents[a].x = 0.3*border;
+        } else if (agents[a].x < 0.3*border) {
+          agents[a].x = img->w - 0.3*border;
         }
-        if (agents[a].y > img->h - border) {
-          agents[a].y = border;
-        } else if (agents[a].y < border) {
-          agents[a].y = img->h - border;
+        if (agents[a].y > img->h - 1.5*border) {
+          agents[a].y = 1.5*border;
+        } else if (agents[a].y < 1.5*border) {
+          agents[a].y = img->h - 1.5*border;
         }
       }
     }

@@ -136,7 +136,7 @@ void opticflow_module_run(void)
 
 /**
  * The main optical flow calculation thread
- * This thread passes the images trough the optical flow
+ * This thread passes the images through the optical flow
  * calculator
  * @param[in] *img The image_t structure of the captured image
  * @return *img The processed image structure

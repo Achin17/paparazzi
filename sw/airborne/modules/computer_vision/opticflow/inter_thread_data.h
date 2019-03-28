@@ -54,6 +54,10 @@ struct opticflow_result_t {
   float divergence;       ///< Divergence as determined with a linear flow fit
 
   float noise_measurement;  ///< noise of measurement, for state filter
+
+  // Yingfu
+  // opticflow->fast9_ret_corners
+  // struct point_t *fast9_ret_corners;
 };
 
 #endif

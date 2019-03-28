@@ -23,7 +23,7 @@
       <define name="VIDEO_CAPTURE_PATH" value="/tmp/paparazzi/images"/>
       <define name="FILE_LOGGER_PATH" value="/tmp/paparazzi/log"/>
       
-      <!-- Detect orange -->
+      <!-- Detect green -->
       <define name="COLOR_OBJECT_DETECTOR_LUM_MIN1" value="70"/>
       <define name="COLOR_OBJECT_DETECTOR_LUM_MAX1" value="120"/>
       <define name="COLOR_OBJECT_DETECTOR_CB_MIN1" value="60"/>
@@ -70,24 +70,42 @@
       <define name="CV_AE_AWB_AV" value="1" />
       <define name="CV_AE_AWB_VERBOSE" value="0" />
     </module-->
-    <module name="video_capture">
-      <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
-      <define name="VIDEO_CAPTURE_FPS" value="10"/>
+
+
+    <!-- use optical flow to detect obstalces infront of the front camera (by Yingfu, under development) -->
+    <module name="cv_opticflow">
+      <define name="OPTICFLOW_CAMERA" value="front_camera"/>
+      <define name="OPTICFLOW_TRACK_BACK" value="1"/> 
+      <define name="OPTICFLOW_SHOW_FLOW" value="1"/> 
+<!--  <define name="MAX_HORIZON" value="10"/>
+ 
+      <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_X" value="0.8"/> 
+      <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> 
+--> <!--Obtained from a linefit-->
     </module>
+
     <module name="cv_detect_color_object">
       <define name="COLOR_OBJECT_DETECTOR_CAMERA1" value="front_camera"/>
       <define name="COLOR_OBJECT_DETECTOR_FPS1" value="0"/>
       <define name="COLOR_OBJECT_DETECTOR_DRAW1" value="1"/>
+      <define name="COLOR_OBJECT_DETECTOR_DRAW2" value="1"/>
     </module>
     <module name="orange_avoider">
       <define name="ORANGE_AVOIDER_VISUAL_DETECTION_ID" value="COLOR_OBJECT_DETECTION1_ID"/>
     </module>
+
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
-      <define name="VIEWVIDEO_CAMERA2" value="bottom_camera"/>
+      <!-- <define name="VIEWVIDEO_CAMERA2" value="bottom_camera"/> -->
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="40"/>
     </module>
+
+    <module name="video_capture">
+      <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
+      <define name="VIDEO_CAPTURE_FPS" value="10"/>
+    </module>
+
   </firmware>
 
   <commands>

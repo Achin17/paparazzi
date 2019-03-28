@@ -37,6 +37,12 @@
 #define VERBOSE_PRINT(...)
 #endif
 
+/* Use optical flow estimates */
+#ifndef OFH_OPTICAL_FLOW_ID
+#define OFH_OPTICAL_FLOW_ID ABI_BROADCAST
+#endif
+PRINT_CONFIG_VAR(OFH_OPTICAL_FLOW_ID)
+
 /*
 uint8_t is the same as a byte.
 uint8_t,uint16_t,uint32_t & uint64_t exist and are equal respectively to: 
@@ -81,6 +87,15 @@ float heading_increment = 5.0f;          // heading angle increment [deg]
 float heading_increment_home = 180.0f;	 // Execute 180 [deg] upon encountering boundary
 float maxDistance = 2.25;               // max waypoint displacement [m] 2.25 initially
 
+int16_t flowX;
+int16_t flowY;
+int16_t flowY_total;
+int16_t flowY_ave;
+int16_t flow_count;
+float vision_time;
+
+
+
 /*
 const declare a constant field or a constant local. 
 Constant fields and locals aren't variables and may not be modified. 
@@ -101,17 +116,30 @@ static void color_detection_cb(uint8_t __attribute__((unused)) sender_id,
   color_count = quality;
 }
 
+// The optical flow ABI event
+static abi_event optical_flow_ev;
+// Callback function of the optical flow estimate:
+void ofh_optical_flow_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp, int16_t flow_x, int16_t flow_y,
+                         int16_t flow_der_x, int16_t flow_der_y, float quality, float size_div);
+
 /*
  * Initialisation function, setting the colour filter, random seed and heading_increment
  */
 void orange_avoider_init(void)
 {
+  flowY_ave = 0;
+  flowY_total = 0;
+  flow_count = 0;
+
   // Initialise random values
   srand(time(NULL));
   chooseRandomIncrementAvoidance();
 
   // bind our colorfilter callbacks to receive the color filter outputs
   AbiBindMsgVISUAL_DETECTION(ORANGE_AVOIDER_VISUAL_DETECTION_ID, &color_detection_ev, color_detection_cb);
+
+  // Subscribe to the optical flow estimator (Yingfu)
+  AbiBindMsgOPTICAL_FLOW(OFH_OPTICAL_FLOW_ID, &optical_flow_ev, ofh_optical_flow_cb);
 }
 
 /*
@@ -135,8 +163,21 @@ void orange_avoider_periodic(void)
   if(color_count <= 2500*2*1.4 && color_count >= 1750*2*1.4){
     obstacle_free_confidence++;
   } else {
-    obstacle_free_confidence -= 2;  // be more cautious with positive obstacle detections
+    // obstacle_free_confidence -= 2;  // be more cautious with positive obstacle detections
   }
+
+  // update our safe confidence using optic flow length
+  printf("flowY_total: %d\n",flowY_total); 
+  flowY_ave = flowY_total / flow_count;
+  printf("flowY_ave: %d\n",flowY_ave); 
+  if (navigation_state == SAFE && (flowY_ave > 50))
+  {
+    obstacle_free_confidence -= 2;  // be more cautious with positive obstacle detections
+    printf("flowY_ave: %d\n",flowY_ave);  // big y means obstacle
+  }
+  flowY_ave = 0;
+  flowY_total = 0;
+  flow_count = 0;
 
   // bound obstacle_free_confidence
   Bound(obstacle_free_confidence, 0, max_trajectory_confidence);
@@ -170,7 +211,7 @@ void orange_avoider_periodic(void)
       break;
     case SEARCH_FOR_SAFE_HEADING:
       increase_nav_heading(heading_increment);
-
+      // flowY = 0; // when turning, do not use optical flow length (Yingfu)
       // make sure we have a couple of good readings before declaring the way safe
       if (obstacle_free_confidence >= 2){
         navigation_state = SAFE;
@@ -266,5 +307,31 @@ uint8_t chooseRandomIncrementAvoidance(void)
     VERBOSE_PRINT("Set avoidance increment to: %f\n", heading_increment);
   }
   return false;
+}
+
+void ofh_optical_flow_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp, int16_t flow_x, int16_t flow_y,
+                         int16_t flow_der_x, int16_t flow_der_y, float quality, float size_div)
+{
+  flowX = flow_x;
+  flowY = flow_y;
+
+  vision_time = ((float)stamp) / 1e6;
+
+  // printf("vision_time: %f\n",vision_time);
+  
+  // printf("flowY: %d\n",flowY);  // big y means obstacle
+
+  if (flowY > 0)
+  {
+    flowY_total = flowY_total + flowY;
+  }
+  else 
+  {
+    flowY_total = flowY_total - flowY;
+  }
+
+  flow_count = flow_count + 1;
+  printf("flow_count: %d\n",flow_count);
+
 }
 
